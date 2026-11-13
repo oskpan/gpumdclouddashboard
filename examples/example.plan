@@ -1,0 +1,7 @@
+# Copy to <gpumdq folder>/plans/<name>.plan, or save as gpumdq_plan.txt in the batch folder (then omit root:).
+# Lists stages that do not exist yet so they count toward progress and ETA.
+root: /mnt/e/my_project/GB_study_20261113
+# relative/stage/dir        total MD steps (optional; used until run.in exists)
+S3_111/seed1/01-relax        50000
+S3_111/seed1/02-mcmd         200000
+S3_111/seed1/03-tension      300000

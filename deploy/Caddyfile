@@ -1,0 +1,26 @@
+# /etc/caddy/Caddyfile on the hub server. Requires Caddy v2.11 or newer.
+# Caddy obtains and renews the HTTPS certificate itself; ports 80 and 443 must be reachable from the internet.
+
+# ---- Option A: no domain name, HTTPS directly on the server's public IP --------------------------
+# Let's Encrypt issues IP-address certificates only with the 6-day "shortlived" profile (Caddy renews them).
+# Clients send no SNI when connecting to an IP address, so default_sni tells Caddy which certificate to use;
+# without it the TLS handshake fails with "tlsv1 alert internal error".
+{
+	default_sni 203.0.113.10
+}
+
+203.0.113.10 {
+	tls {
+		issuer acme {
+			profile shortlived
+		}
+	}
+	encode gzip
+	reverse_proxy 127.0.0.1:8780
+}
+
+# ---- Option B: with a domain name (delete Option A, including the global { } block) ---------------
+# gpumdq.example.org {
+# 	encode gzip
+# 	reverse_proxy 127.0.0.1:8780
+# }

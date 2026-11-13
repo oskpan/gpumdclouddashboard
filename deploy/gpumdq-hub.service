@@ -1,0 +1,22 @@
+# /etc/systemd/system/gpumdq-hub.service   then:  systemctl daemon-reload && systemctl enable --now gpumdq-hub
+[Unit]
+Description=gpumdq hub (multi-PC GPUMD monitor)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=gpumdq
+WorkingDirectory=/opt/gpumdq
+Environment=GPUMDQ_HUB_HOME=/var/lib/gpumdq-hub
+# Environment=GPUMDQ_NTFY=https://ntfy.sh/<long-random-topic>
+ExecStart=/usr/bin/python3 -u /opt/gpumdq/gpumdq_hub.py serve --host 127.0.0.1 --port 8780
+Restart=always
+RestartSec=5
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/lib/gpumdq-hub
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target
