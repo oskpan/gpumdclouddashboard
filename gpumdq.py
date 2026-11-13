@@ -952,6 +952,8 @@ def serve(args):
     sched = Scheduler(db, gpus, args.cmd, args.poll)
     threading.Thread(target=sched.run, daemon=True).start()
     Handler.sched = sched
+    if not args.hub:
+        print("gpumdq: not reporting to a hub (no hub.env next to gpumdq.py, or GPUMDQ_HUB not set in it)")
     if args.hub:
         if not args.hub_token:
             sys.exit("--hub needs --hub-token (or GPUMDQ_HUB_TOKEN)")
@@ -1014,7 +1016,29 @@ def cli_list(args):
               f"{pr:>8} {fmt_t(j.get('elapsed')):>8} {fmt_t(j.get('eta')):>8}  {j['name']}  ({j['workdir']})")
 
 
+def load_hub_env():
+    """Read hub.env next to this file (KEY=VALUE lines) into the environment, without overriding variables
+    that are already set. start_wsl.sh does the same; this makes a plain `python3 gpumdq.py serve` report too."""
+    f = Path(__file__).resolve().parent / "hub.env"
+    try:
+        lines = f.read_text(errors="ignore").splitlines()
+    except OSError:
+        return None
+    for ln in lines:
+        ln = ln.strip()
+        if not ln or ln.startswith("#") or "=" not in ln:
+            continue
+        k, v = ln.split("=", 1)
+        k, v = k.strip(), v.strip().strip('"').strip("'")
+        if k.startswith("export "):
+            k = k[7:].strip()
+        if k.startswith("GPUMDQ_") and v:
+            os.environ.setdefault(k, v)
+    return f
+
+
 def main():
+    load_hub_env()
     ap = argparse.ArgumentParser(description="Local job queue and monitor for GPUMD")
     ap.add_argument("--server", default=f"127.0.0.1:{DEFAULT_PORT}", help="host:port of the gpumdq server")
     sub = ap.add_subparsers(dest="cmd_name", required=True)

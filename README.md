@@ -151,7 +151,8 @@ GPUMDQ_HUB_TOKEN=<token printed by add-host for this PC>
 GPUMDQ_NAME=PC1
 GPUMD_BIN=/home/<user>/GPUMD/src/gpumd      # the binary your runs use
 ```
-Restart gpumdq with `start_gpumdq.bat`. This doesn't touch running jobs. The console should print:
+Restart gpumdq with `start_gpumdq.bat`. This doesn't touch running jobs. `gpumdq.py` also reads `hub.env` from its own folder,
+so a plain `python3 gpumdq.py serve` reports to the hub too. The console should print:
 ```
 Hub   : reporting to https://... as 'PC1'
 gpumdq: pushing status as 'PC1' to https://... every 10 s
@@ -271,7 +272,7 @@ Hub endpoints: `POST /api/push` (PC, bearer token); `GET /`, `/api/hosts`, `/h/<
 | run shows as **ext** but no batch card | the driver isn't started as a script file in the study folder, or it exited; see the agent guide |
 | progress `?` | a `run` block in `run.in` has no `dump_thermo` before it |
 | progress jumps to ~100 % | `thermo.out` contains rows from an earlier run in the same folder; use a fresh folder |
-| PC missing on the hub, console says nothing about the hub | `hub.env` missing or still the template (placeholder URL or token); restart gpumdq after editing it |
+| PC missing or "not reporting" on the hub | console says `not reporting to a hub`: `hub.env` is missing next to gpumdq.py or still the template. Fix it and restart gpumdq (older versions only read hub.env when started through start_wsl.sh) |
 | `cannot push to hub … 403` | wrong token: run `add-host NAME` again on the server and update `hub.env` |
 | `cannot push … SSL` / `tlsv1 alert internal error` | `default_sni` is missing in the Caddyfile (IP certificates); see docs/SERVER_SETUP.md |
 | hub card red "silent for …" | PC asleep or offline, network down, or gpumdq closed |
